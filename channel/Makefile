@@ -30,8 +30,8 @@ build-hd: gen-hd $(APPNAME)
 install-hd: build-hd install
 
 update_truex_lib_uri:
-	sed -i '' 's/ComponentLibrary id=\"TruexAdRendererLib\" uri=\".*\"/ComponentLibrary id=\"TruexAdRendererLib\" uri=\"http:\/\/ctv.truex.com\/roku\/v${TARGET_VERSION}.pkg\"/' ./components/TruexAdRendererScene.xml ;\
-	sed -i '' 's/TruexAdRenderer-availability-v1.brs/TruexAdRenderer-availability-v${TARGET_VERSION}.brs/' ./source/room_main.brs ;\
+	sed -i '' 's/ComponentLibrary id=\"TruexAdRendererLib\" uri=\".*\"/ComponentLibrary id=\"TruexAdRendererLib\" uri=\"http:\/\/ctv.truex.com\/roku\/v${MAJOR}_${MINOR}\/${RC_DEVELOP}\/${LIBNAME}-${TARGET_VERSION}.pkg\"/' ./components/TruexAdRendererScene.xml ;\
+	sed -i '' 's/TruexAdRenderer-availability-v1.brs/TruexAdRenderer-availability-${TARGET_VERSION}.brs/' ./source/room_main.brs ;\
 
 # deploy `Truex_RokuExampleGame` side-load capable zip file to s3
 # append the major, minor then rc or develop components to the upload path.
@@ -44,4 +44,4 @@ deploy: update_truex_lib_uri
 	echo $$BUILD_NUM ;\
 	echo $$BUILD_HASH ;\
 	echo ${TARGET_VERSION} ;\
-	aws s3 cp dist/apps/${APPNAME}.zip s3://$$S3_BUCKET/roku/v${MAJOR}_${MINOR}/${RC_DEVELOP}/${APPNAME}-${RC_DEVELOP}-v${TARGET_VERSION}.zip --acl public-read ;\
+	aws s3 cp dist/apps/${APPNAME}.zip s3://$$S3_BUCKET/roku/v${MAJOR}_${MINOR}/${RC_DEVELOP}/${APPNAME}-${RC_DEVELOP}-${TARGET_VERSION}.zip --acl public-read ;\
