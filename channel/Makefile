@@ -36,7 +36,7 @@ update_truex_lib_uri:
 # deploy `Truex_RokuExampleGame` side-load capable zip file to s3
 # append the major, minor then rc or develop components to the upload path.
 # Note: the MAJOR, MINOR, BUILD_NUM, BUILD_HASH env variables are set upstream by the Jenkins system (TAR's Jenkinsfile)
-deploy: update_truex_lib_uri	
+deploy: update_truex_lib_uri $(APPNAME)
 	S3_BUCKET=$$(grep s3_bucket ~/Library/Truex/Roku/target | sed 's/s3_bucket=//') ;\
 	echo $$S3_BUCKET ;\
 	echo $$MAJOR ;\
