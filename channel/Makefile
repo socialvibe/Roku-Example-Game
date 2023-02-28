@@ -31,12 +31,15 @@ install-hd: build-hd install
 
 update_truex_lib_uri:
 	sed -i '' 's/ComponentLibrary id=\"TruexAdRendererLib\" uri=\".*\"/ComponentLibrary id=\"TruexAdRendererLib\" uri=\"http:\/\/ctv.truex.com\/roku\/v${MAJOR}_${MINOR}\/${RC_DEVELOP}\/${LIBNAME}-${TARGET_VERSION}.pkg\"/' ./components/TruexAdRendererScene.xml ;\
-	sed -i '' 's/TruexAdRenderer-availability-v1.brs/TruexAdRenderer-availability-${TARGET_VERSION}.brs/' ./source/room_main.brs ;\
+	sed -i '' 's/ctv.truex.com\/roku\/v1\/release\/TruexAdRenderer-availability-v1.brs/ctv.truex.com\/roku\/v${MAJOR}_${MINOR}\/${RC_DEVELOP}\/TruexAdRenderer-availability-${TARGET_VERSION}.brs/' ./source/room_main.brs ;\
+
+fetch_game_engine:
+	git submodule update --init --recursive
 
 # deploy `Truex_RokuExampleGame` side-load capable zip file to s3
 # append the major, minor then rc or develop components to the upload path.
 # Note: the MAJOR, MINOR, BUILD_NUM, BUILD_HASH env variables are set upstream by the Jenkins system (TAR's Jenkinsfile)
-deploy: update_truex_lib_uri $(APPNAME)
+deploy: fetch_game_engine update_truex_lib_uri $(APPNAME)
 	S3_BUCKET=$$(grep s3_bucket ~/Library/Truex/Roku/target | sed 's/s3_bucket=//') ;\
 	echo $$S3_BUCKET ;\
 	echo $$MAJOR ;\
