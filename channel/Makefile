@@ -11,10 +11,7 @@ ROKU_TEST_WAIT_DURATION = 5
 ROKU_DEV_TARGET := $(if $(ROKU_DEV_TARGET_OVERRIDE),$(ROKU_DEV_TARGET_OVERRIDE),$(if $(ROKU_DEV_TARGET),$(ROKU_DEV_TARGET),$(shell grep roku_ip_address ~/Library/Truex/Roku/target | sed 's/roku_ip_address=//')))
 DEVPASSWORD := $(if $(DEVPASSWORD_OVERRIDE),$(DEVPASSWORD_OVERRIDE),$(if $(DEVPASSWORD),$(DEVPASSWORD),$(shell grep roku_dev_password ~/Library/Truex/Roku/target | sed 's/roku_dev_password=//')))
 ZIP_EXCLUDE = -x test\* -x *.sh -x makefile -x dist\* -x channel_components\* -x channel_source\* -x channel_images\* -x *app.mk* -x *README* -x *rokuTarget* -x *.svn* -x *.git* -x *.DS_Store* -x out\* -x packages\* -x design\* -x node_modules/**\* -x node_modules -x .buildpath* -x .project* -x renderer\* -x backup\* -x *.code-workspace
-# BRANCH_NAME is set by Jenkins. When on a release branch, the following will evaluate to `rc`, while on a develop branch, it will be left alone (`develop`).
-RC_DEVELOP = $(shell echo $$BRANCH_NAME | sed "s/release.*/rc/")
 APPSROOT = .
-TARGET_VERSION = v${MAJOR}.${MINOR}.${BUILD_NUM}-${BUILD_HASH}
 include $(APPSROOT)/app.mk
 
 # The below `-hd` targets are normally used by CI to produce the HD / 720p version of Southback.
@@ -29,22 +26,10 @@ build-hd: gen-hd $(APPNAME)
 
 install-hd: build-hd install
 
+.PHONY: update_truex_lib_uri
 update_truex_lib_uri:
-	sed -i '' 's/ComponentLibrary id=\"TruexAdRendererLib\" uri=\".*\"/ComponentLibrary id=\"TruexAdRendererLib\" uri=\"http:\/\/ctv.truex.com\/roku\/v${MAJOR}_${MINOR}\/${RC_DEVELOP}\/${LIBNAME}-${TARGET_VERSION}.pkg\"/' ./components/TruexAdRendererScene.xml ;\
-	sed -i '' 's/ctv.truex.com\/roku\/v1\/release\/TruexAdRenderer-availability-v1.brs/ctv.truex.com\/roku\/v${MAJOR}_${MINOR}\/${RC_DEVELOP}\/TruexAdRenderer-availability-${TARGET_VERSION}.brs/' ./source/room_main.brs ;\
+	sed -i '' 's|ComponentLibrary id="TruexAdRendererLib" uri=".*"|ComponentLibrary id="TruexAdRendererLib" uri="$(TRUEX_LIB_URI)"|' ./components/TruexAdRendererScene.xml ;\
+	sed -i '' 's|"https://ctv.truex.com/roku/v1/release/TruexAdRenderer-availability-v1.brs"|"$(TRUEX_AVAILABILITY_URI)"|' ./source/room_main.brs
 
 fetch_game_engine:
 	git submodule update --init --recursive
-
-# deploy `Truex_RokuExampleGame` side-load capable zip file to s3
-# append the major, minor then rc or develop components to the upload path.
-# Note: the MAJOR, MINOR, BUILD_NUM, BUILD_HASH env variables are set upstream by the Jenkins system (TAR's Jenkinsfile)
-deploy: fetch_game_engine update_truex_lib_uri $(APPNAME)
-	S3_BUCKET=$$(grep s3_bucket ~/Library/Truex/Roku/target | sed 's/s3_bucket=//') ;\
-	echo $$S3_BUCKET ;\
-	echo $$MAJOR ;\
-	echo $$MINOR ;\
-	echo $$BUILD_NUM ;\
-	echo $$BUILD_HASH ;\
-	echo ${TARGET_VERSION} ;\
-	aws s3 cp dist/apps/${APPNAME}.zip s3://$$S3_BUCKET/roku/v${MAJOR}_${MINOR}/${RC_DEVELOP}/${APPNAME}-${RC_DEVELOP}-${TARGET_VERSION}.zip --acl public-read ;\
