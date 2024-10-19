@@ -8,8 +8,8 @@ IMPORTS =
 ROKU_TEST_ID = 1
 ROKU_TEST_WAIT_DURATION = 5
 # Use globally set IP address and password as fallback
-ROKU_DEV_TARGET := $(if $(ROKU_DEV_TARGET_OVERRIDE),$(ROKU_DEV_TARGET_OVERRIDE),$(if $(ROKU_DEV_TARGET),$(ROKU_DEV_TARGET),$(shell grep roku_ip_address ~/Library/Truex/Roku/target | sed 's/roku_ip_address=//')))
-DEVPASSWORD := $(if $(DEVPASSWORD_OVERRIDE),$(DEVPASSWORD_OVERRIDE),$(if $(DEVPASSWORD),$(DEVPASSWORD),$(shell grep roku_dev_password ~/Library/Truex/Roku/target | sed 's/roku_dev_password=//')))
+ROKU_DEV_TARGET := $(if $(ROKU_DEV_TARGET_OVERRIDE),$(ROKU_DEV_TARGET_OVERRIDE),$(ROKU_DEV_TARGET))
+DEVPASSWORD := $(if $(DEVPASSWORD_OVERRIDE),$(DEVPASSWORD_OVERRIDE),$(DEVPASSWORD))
 ZIP_EXCLUDE = -x test\* -x *.sh -x makefile -x dist\* -x channel_components\* -x channel_source\* -x channel_images\* -x *app.mk* -x *README* -x *rokuTarget* -x *.svn* -x *.git* -x *.DS_Store* -x out\* -x packages\* -x design\* -x node_modules/**\* -x node_modules -x .buildpath* -x .project* -x renderer\* -x backup\* -x *.code-workspace
 APPSROOT = .
 include $(APPSROOT)/app.mk
@@ -28,8 +28,9 @@ install-hd: build-hd install
 
 .PHONY: update_truex_lib_uri
 update_truex_lib_uri:
-	sed -i '' 's|ComponentLibrary id="TruexAdRendererLib" uri=".*"|ComponentLibrary id="TruexAdRendererLib" uri="$(TRUEX_LIB_URI)"|' ./components/TruexAdRendererScene.xml ;\
-	sed -i '' 's|"https://ctv.truex.com/roku/v1/release/TruexAdRenderer-availability-v1.brs"|"$(TRUEX_AVAILABILITY_URI)"|' ./source/room_main.brs
+	sed -i.back 's|ComponentLibrary id="TruexAdRendererLib" uri=".*"|ComponentLibrary id="TruexAdRendererLib" uri="$(TRUEX_LIB_URI)"|' ./components/TruexAdRendererScene.xml ;\
+	sed -i.back 's|"https://ctv.truex.com/roku/v1/release/TruexAdRenderer-availability-v1.brs"|"$(TRUEX_AVAILABILITY_URI)"|' ./source/room_main.brs ;\
+	rm -f './components/TruexAdRendererScene.xml.back' './source/room_main.brs.back'
 
 fetch_game_engine:
 	git submodule update --init --recursive
