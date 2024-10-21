@@ -3,7 +3,7 @@
 #
 
 MAKE_FILE := $(lastword $(MAKEFILE_LIST))
-APPNAME = Truex_RokuExampleGame
+APPNAME = truex-roku-game-reference-app
 IMPORTS =
 ROKU_TEST_ID = 1
 ROKU_TEST_WAIT_DURATION = 5
